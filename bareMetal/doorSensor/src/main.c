@@ -18,65 +18,48 @@ extern volatile uint32_t system_time; // update by systick
 #define RFM9X_REG_VERSION  0x42
 #define EXPECTED_VERSION   0x12
 
+void rfm9x_init(void) 
+{
+    rfm9x_reset();
+    nano_wait(100000);
+    init_spi1_lora();
+    nano_wait(100000);
+
+    printf("\n=== RFM69 Register Check ===\n");
+    test_rfm9x_registers();
+
+    rfm9x_enter_lora_mode();
+    nano_wait(10000);
+    rfm9x_set_mode(0x81); // standby
+    nano_wait(10000);
+}
+
 int main(void) 
 {
     internal_clock(); // configure hsi clock
     init_systick(); // initialize systick timer
     uart_init(); // uart initalization 
     setbuf(stdout, NULL);  // disable buffering on stdout for immediate prints
- 
-    //spi_init();
-    rfm9x_reset();
-    init_spi1_lora();      // if you are using the dedicated LoRa SPI config
-    //rfm9x_set_frequency(915);     // 915 MHz US
-    //rfm9x_set_tx_power(14);       // dBm
-    //rfm9x_set_mode(0x01);         // Standby mode
-    nano_wait(5000000);    // short 
-    // rfm9x_set_frequency(915);
-    // rfm9x_set_tx_power(14);
-    // rfm9x_set_mode(0x03); 
-
-
-    printf("\n=== RFM69 Register Check ===\n");
-    test_rfm9x_registers();
-
-    test_rfm9x_basic_communication();
+   
+    rfm9x_init();
     nano_wait(1000000);
 
-
-    // if (ENABLE_RF_TRANSMIT == 1) printf("RFM69 init done!\r\n");
     printf("System: Initialized. Initializing Door sensor.\r\n");
-
     reedSwitch_init(); // initalize reed switch gpio
-    // while(1)
-    // {
-    //     rfm9x_read_register(0x02);
-    //     nano_wait(500000);
-
-    // }
-    //reedSwitchEnableInt(); // reed switch EXTI
-
-    //delay_ms(100);
-    //printf("System Initialized. Monitoring Door State...\r\n");
-    //delay_ms(200);
 
     // PC6 LED output for reed switch. When aligned with magnet lights red
     RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
     GPIOC->MODER &= ~(0x3 << (6 * 2)); // Set PC6 as output
     GPIOC->MODER |= (0x1 << (6 * 2)); // Clear bit for output mode
 
-    // if (ENABLE_RF_TRANSMIT == 1) rf_testWriteReg(0x05, 0xAA);
+    uart_send_string("LoRa TX/RX Ready\r\n");
 
     while (1) 
     {
         uint32_t currentTime = system_time;
 
-        // uint8_t version = rfm_readReg(RFM69_REG_VERSION);
-
-        //printf("[TEST] RFM69 RegVersion = 0x%02X (expected 0x%02X)\r\n",
-              // version, EXPECTED_VERSION);
-
-
+        nano_wait(1000000000);
+      
         if ((currentTime - lastChangeTime) >= DEBOUNCE)
         {
             uint8_t newState = getState(); // 1=OPEN, 0=CLOSED
@@ -84,45 +67,26 @@ int main(void)
             {
                 doorState = newState;
                 lastChangeTime = currentTime;
-
-                char message[32];
+                char message[64];
                 if (doorState == 0)
                 {
                     GPIOC->ODR |= (1 << 6);
                     printf("Door ID: 1, CLOSED.\r\n");
                     sprintf(message, "Door ID: 1, CLOSED");
-                    const char msg[] = "Door ID:1 CLOSED";
-                    //rfm9x_send_packet((uint8_t *)msg, strlen(msg));
-                    uint8_t buffer[64];
-                    strcpy((char*)buffer, msg);
-                    uart_send_string("Sending packet...\r\n");
-                    rfm9x_send_packet(buffer, strlen((char*)buffer));
-                    uart_send_string("Sent!\r\n");
-            
-
-                    //if (ENABLE_RF_TRANSMIT)
-                        // rf_transmit("Door CLOSED");
                 }
                 else
                 {
                     GPIOC->ODR &= ~(1 << 6); // turn led on 
                     printf("Door ID: 1, OPEN.\r\n");
                     sprintf(message, "Door ID: 1, OPEN");
-                    const char msg[] = "Door ID:1 OPEN";
-                    //rfm9x_send_packet((uint8_t *)msg, strlen(msg));
-
-                    //if (ENABLE_RF_TRANSMIT)
-                        // rf_transmit("Door OPEN");
                 }
-
-                // //rf_transmit(message);
-                // printf("[STATE CHANGE] %s\r\n", message);
-                // if (ENABLE_RF_TRANSMIT)
-                //     rf_transmit(message);
+                uart_send_string("Sending packet...\r\n");
+                rfm9x_transmit_message(message);
+                uart_send_string("Sent!\r\n");
             }
         }
-        delay_ms(1000);
 
+        delay_ms(1000);
     }
 }
 
