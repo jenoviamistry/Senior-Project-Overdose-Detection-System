@@ -1,4 +1,4 @@
-#include "spi.h"
+/*#include "spi.h"
 
 void spi_init(void) 
 {
@@ -21,3 +21,4 @@ uint8_t spi_transfer(uint8_t data)
     while (!(SPI1->SR & SPI_SR_RXNE)); // wait 
     return SPI1->DR;                  // recvd data 
 }
+*/

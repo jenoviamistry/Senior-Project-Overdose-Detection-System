@@ -1,4 +1,4 @@
-#include "stm32f0xx.h"
+/*#include "stm32f0xx.h"
 #include "clock.h"
 #include "reedSwitch.h"
 #include "uart.h"
@@ -65,3 +65,4 @@ int main(void) {
     
     }
 }
+*/

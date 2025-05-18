@@ -1,4 +1,4 @@
-#include "stm32f091xc.h"
+/*#include "stm32f091xc.h"
 #include "sleepMode.h"
 #include "batMonitor.h"
 // manages low power mode 
@@ -40,6 +40,6 @@ void setup_RTC_wakeup(void) // for hourly wake
     RTC->WPR = 0xFF; 
 
     NVIC_EnableIRQ(RTC_IRQn);
-}
+}*/
 
 

@@ -6,5 +6,7 @@ void uart_init(void);
 void uart_send_char(char c);
 void uart_send_string(const char* str);
 void print_usart_status(void);
+int _write(int file, char *ptr, int len);
+
 
 #endif 

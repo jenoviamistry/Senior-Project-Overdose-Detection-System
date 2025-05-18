@@ -1,4 +1,4 @@
-#include "stm32f091xc.h"
+/*#include "stm32f091xc.h"
 #include "reedSwitch.h"
 #include <stdint.h>
 #include <stdio.h>
@@ -59,6 +59,4 @@ void reedSwitchEnableInt()
     NVIC_EnableIRQ(EXTI0_1_IRQn); // enable int in NVIC
 }
 */
-
-
 
