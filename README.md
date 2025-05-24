@@ -6,7 +6,7 @@ A real-time embedded system designed to detect potential overdose incidents in p
 
 The system consists of the following key components:
 
-- **Door Sensor Subsystem (developed by Jenovia Mistry)**  
+- **Door Sensor Subsystem (designed and implemented by Jenovia Mistry)**  
   Monitors door open/close status using a reed switch. Built using bare-metal programming on an STM32F0 microcontroller, this subsystem includes direct register-level control and structured SPI communication with an RF transceiver to transmit door state updates.
 
 - **Pager Notification Subsystem**  
